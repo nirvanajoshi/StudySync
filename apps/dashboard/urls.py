@@ -1,7 +1,6 @@
 from django.urls import path
-
-app_name = "dashboard"
+from . import views
 
 urlpatterns = [
-
+    path("", views.home, name="home"),
 ]
