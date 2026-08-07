@@ -55,7 +55,6 @@ class Progress(models.Model):
             })
 
     def save(self, *args, **kwargs):
-        # Automatically adjust longest_streak if current_streak exceeds it before saving
         if self.current_streak > self.longest_streak:
             self.longest_streak = self.current_streak
         super().save(*args, **kwargs)
