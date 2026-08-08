@@ -6,12 +6,18 @@ from .models import Note, Tag
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "user",
         "color",
         "created_at",
     )
 
     search_fields = (
         "name",
+        "user__username",
+    )
+
+    list_filter = (
+        "user",
     )
 
     ordering = (

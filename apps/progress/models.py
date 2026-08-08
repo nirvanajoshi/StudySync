@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.exceptions import ValidationError
 
 
 class Progress(models.Model):
@@ -46,13 +45,6 @@ class Progress(models.Model):
                 name="unique_user_subject_progress"
             )
         ]
-
-    def clean(self):
-        super().clean()
-        if self.current_streak > self.longest_streak:
-            raise ValidationError({
-                "current_streak": "Current streak cannot be greater than longest streak."
-            })
 
     def save(self, *args, **kwargs):
         if self.current_streak > self.longest_streak:

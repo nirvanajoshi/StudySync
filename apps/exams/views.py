@@ -37,7 +37,10 @@ def exam_detail(request, pk):
 @login_required
 def exam_create(request):
     if request.method == "POST":
-        form = ExamForm(request.POST)
+        form = ExamForm(
+            request.POST,
+            user=request.user,
+        )
 
         if form.is_valid():
             exam = form.save(commit=False)
@@ -54,7 +57,7 @@ def exam_create(request):
                 pk=exam.pk
             )
     else:
-        form = ExamForm()
+        form = ExamForm(user=request.user)
 
     return render(
         request,
@@ -77,7 +80,8 @@ def exam_edit(request, pk):
     if request.method == "POST":
         form = ExamForm(
             request.POST,
-            instance=exam
+            instance=exam,
+            user=request.user,
         )
 
         if form.is_valid():
@@ -93,7 +97,10 @@ def exam_edit(request, pk):
                 pk=exam.pk
             )
     else:
-        form = ExamForm(instance=exam)
+        form = ExamForm(
+            instance=exam,
+            user=request.user,
+        )
 
     return render(
         request,

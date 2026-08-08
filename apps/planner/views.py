@@ -153,7 +153,10 @@ def study_session_create(request, plan_pk):
     )
 
     if request.method == "POST":
-        form = StudySessionForm(request.POST)
+        form = StudySessionForm(
+            request.POST,
+            user=request.user,
+        )
 
         if form.is_valid():
             session = form.save(commit=False)
@@ -170,7 +173,7 @@ def study_session_create(request, plan_pk):
                 pk=daily_plan.pk
             )
     else:
-        form = StudySessionForm()
+        form = StudySessionForm(user=request.user)
 
     return render(
         request,
@@ -194,7 +197,8 @@ def study_session_edit(request, pk):
     if request.method == "POST":
         form = StudySessionForm(
             request.POST,
-            instance=session
+            instance=session,
+            user=request.user,
         )
 
         if form.is_valid():
@@ -210,7 +214,10 @@ def study_session_edit(request, pk):
                 pk=session.daily_plan.pk
             )
     else:
-        form = StudySessionForm(instance=session)
+        form = StudySessionForm(
+            instance=session,
+            user=request.user,
+        )
 
     return render(
         request,

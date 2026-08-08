@@ -4,7 +4,12 @@ from django.core.validators import RegexValidator
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    user = models.ForeignKey(
+        User,
+        related_name="tags",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(max_length=50)
     color = models.CharField(
         max_length=7,
         default="#6C757D",
@@ -22,6 +27,12 @@ class Tag(models.Model):
         verbose_name = "Tag"
         verbose_name_plural = "Tags"
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "name"],
+                name="unique_tag_name_per_user",
+            ),
+        ]
 
     def __str__(self):
         return self.name

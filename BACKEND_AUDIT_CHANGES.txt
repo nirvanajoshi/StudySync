@@ -1,0 +1,152 @@
+=====================================================================
+StudySync - BACKEND AUDIT CHANGES REPORT
+Date: 2026-08-08
+=====================================================================
+
+All Django checks now pass:
+  - python manage.py check            -> no issues (0 silenced)
+  - python manage.py makemigrations --check -> no changes detected
+  - python manage.py migrate          -> all migrations applied
+  - python manage.py test             -> test runner works (0 tests yet)
+
+=====================================================================
+FILES CHANGED (12 modified + 1 new migration)
+=====================================================================
+
+1. apps/dashboard/urls.py
+   - FIXED BLOCKER: the root URL pointed to views.home, which does not
+     exist in apps/dashboard/views.py. This crashed EVERY Django command
+     (check, migrate, makemigrations) with AttributeError at import time.
+   - Changed to point to the existing view: views.dashboard_view.
+   - NOTE: routing design was NOT touched (per your instruction).
+
+2. apps/notes/models.py
+   - Tag model is now user-specific:
+     * Added  user = ForeignKey(User, related_name="tags")  (CASCADE)
+     * Removed the global unique=True on Tag.name
+     * Added Meta constraint: unique_tag_name_per_user on (user, name)
+   - This prevents users from seeing/editing/deleting other users' tags.
+
+3. apps/notes/migrations/0002_tag_user.py  (NEW FILE)
+   - Hand-written migration that matches the model exactly:
+     * AddField tag.user (NOT NULL FK, no default)
+     * AlterField tag.name (drop global uniqueness)
+     * AddConstraint unique_tag_name_per_user
+   - Safe to apply: the notes_tag table was empty (no data backfill needed).
+
+4. apps/notes/forms.py
+   - NoteForm now accepts user=... and filters:
+     * subject dropdown -> only the current user's active subjects
+     * tags dropdown    -> only the current user's tags
+
+5. apps/notes/views.py
+   - tag_list: now login_required and filtered to request.user's tags
+   - tag_create: assigns tag.user = request.user before saving
+   - tag_delete: get_object_or_404 now also filters user=request.user
+   - note_create / note_edit: pass user=request.user to NoteForm
+     in BOTH the GET and POST branches (prevents data leaks on page load)
+
+6. apps/notes/admin.py
+   - TagAdmin: added "user" to list_display, search_fields and list_filter
+
+7. apps/planner/forms.py
+   - StudySessionForm:
+     * Removed "daily_plan" from the form fields (the view sets it from
+       the URL; previously a user could hijack another user's plan)
+     * Added user=... filtering: subject -> user's active subjects,
+       chapter -> user's chapters
+
+8. apps/planner/views.py
+   - study_session_create / study_session_edit: pass user=request.user
+     to StudySessionForm in BOTH GET and POST branches
+
+9. apps/exams/forms.py
+   - ExamForm: subject dropdown now filtered to the current user's
+     active subjects only
+
+10. apps/exams/views.py
+    - exam_create / exam_edit: pass user=request.user to ExamForm
+      in BOTH GET and POST branches
+
+11. apps/progress/models.py
+    - Removed the contradictory clean() method, which raised a
+      validation error whenever current_streak > longest_streak and
+      therefore blocked the save() auto-sync logic (which is designed to
+      bump longest_streak automatically).
+    - Removed the now-unused ValidationError import.
+
+12. requirements.txt
+    - The file was saved as UTF-16 (unicode) encoding, which pip cannot
+      parse. Rewritten as plain UTF-8/ASCII.
+      Contents (unchanged): asgiref==3.12.1, Django==6.0.8,
+      pillow==12.3.0, sqlparse==0.5.5, tzdata==2026.3
+
+13. db.sqlite3
+    - Migration notes.0002_tag_user applied.
+
+=====================================================================
+PROBLEMS FOUND
+=====================================================================
+
+- apps/dashboard/urls.py referenced a nonexistent view (views.home),
+  breaking all Django commands at import time.
+- Tags were global: tag_list was not login-protected, any user could
+  delete any tag, and tag names had to be globally unique.
+- ExamForm, StudySessionForm and NoteForm showed every user's subjects,
+  chapters and tags in their dropdowns (cross-user data exposure).
+- StudySessionForm allowed a user to reassign a session to another
+  user's daily plan when editing.
+- Progress model had contradictory validation: clean() rejected
+  current_streak > longest_streak even though save() is meant to
+  auto-correct that value.
+- requirements.txt was UTF-16 encoded (pip would fail to read it).
+
+=====================================================================
+PROBLEMS FIXED
+=====================================================================
+
+- Root URL now uses the existing dashboard_view (minimal fix only;
+  full routing is deferred to the routing step).
+- Tags are user-specific with a per-user unique name constraint, and
+  all tag views enforce ownership.
+- All create/edit forms now limit subject/chapter/tag dropdowns to the
+  logged-in user, in both GET and POST requests.
+- daily_plan removed from StudySessionForm to prevent plan hijacking.
+- Progress streaks now auto-sync via save() without a blocking clean().
+- requirements.txt rewritten in UTF-8.
+
+=====================================================================
+BACKEND DECISIONS MADE
+=====================================================================
+
+- Tags are USER-SPECIFIC (your stated preference) - matches the
+  multi-user architecture of StudySync.
+- Progress model keeps its save() auto-sync behavior; the conflicting
+  clean() validation was removed rather than the reverse.
+- Form user filtering uses an optional user= kwarg; ALL current view
+  call sites pass user=request.user.
+
+=====================================================================
+REMAINING WARNINGS / DEFERRED (URL ROUTING - NOT TOUCHED)
+=====================================================================
+
+- apps/dashboard/urls.py has NO app_name = "dashboard", so the
+  "dashboard:dashboard" namespace used by accounts views and
+  LOGIN_REDIRECT_URL will not resolve until routing is done.
+- Settings LOGIN_URL='login', LOGIN_REDIRECT_URL='dashboard',
+  LOGOUT_REDIRECT_URL='login' reference URL names that do not exist yet.
+- All app urls.py files are still empty - they will be filled during
+  the routing step.
+
+=====================================================================
+VERIFICATION COMMANDS
+=====================================================================
+
+Run these from the project root (C:\Users\damod\projects\StudySync):
+
+  python manage.py check
+  python manage.py makemigrations --check
+  python manage.py migrate
+  python manage.py test
+
+=====================================================================
