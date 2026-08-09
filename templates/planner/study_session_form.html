@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · StudySync{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">
+            For <a href="{% url 'planner:daily_plan_detail' pk=daily_plan.pk %}">{{ daily_plan.date|date:"l, M j" }}</a>
+        </p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% include "partials/form_field.html" with field=form.subject %}
+            {% include "partials/form_field.html" with field=form.chapter %}
+            {% include "partials/form_field.html" with field=form.start_time %}
+            {% include "partials/form_field.html" with field=form.end_time %}
+            {% include "partials/form_field.html" with field=form.planned_duration %}
+            {% include "partials/form_field.html" with field=form.actual_duration %}
+            {% include "partials/form_field.html" with field=form.status %}
+            {% include "partials/form_field.html" with field=form.priority %}
+            {% include "partials/form_field.html" with field=form.remarks %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if session %}Save Changes{% else %}Add Session{% endif %}
+                </button>
+                <a class="btn btn-secondary" href="{% url 'planner:daily_plan_detail' pk=daily_plan.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

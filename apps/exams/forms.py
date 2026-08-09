@@ -6,6 +6,11 @@ from .models import Exam
 
 
 class ExamForm(forms.ModelForm):
+    duration = forms.DurationField(
+        help_text="Format: HH:MM:SS, e.g. 02:00:00",
+        widget=forms.TextInput(attrs={"placeholder": "02:00:00"}),
+    )
+
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         # Only allow the current user's own subjects.

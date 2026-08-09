@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+{% load studysync_extras %}
+
+{% block title %}Plan {{ daily_plan.date|date:"M j" }} · StudySync{% endblock %}
+{% block page_title %}Plan · {{ daily_plan.date|date:"D, M j, Y" }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ daily_plan.date|date:"l, F j, Y" }}</h1>
+        <p class="subtitle">
+            {% if daily_plan.is_completed %}
+            <span class="badge badge-green"><span class="badge-dot"></span>Completed</span>
+            {% else %}
+            <span class="badge badge-indigo"><span class="badge-dot"></span>In progress</span>
+            {% endif %}
+        </p>
+    </div>
+    <div class="flex">
+        <a class="btn btn-secondary" href="{% url 'planner:daily_plan_edit' pk=daily_plan.pk %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Plan
+        </a>
+        <a class="btn btn-primary" href="{% url 'planner:study_session_create' plan_pk=daily_plan.pk %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Session
+        </a>
+    </div>
+</div>
+
+<div class="card mb-16">
+    <div class="card-body">
+        <div class="detail-list">
+            <div class="detail-item">
+                <div class="k">Available Hours</div>
+                <div class="v">{{ daily_plan.total_available_hours }}h</div>
+            </div>
+            <div class="detail-item">
+                <div class="k">Planned Study</div>
+                <div class="v">{{ daily_plan.planned_study_hours }}h</div>
+            </div>
+            <div class="detail-item">
+                <div class="k">Sessions</div>
+                <div class="v">{{ study_sessions.count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Study Sessions</h2>
+        <span class="badge badge-indigo">{{ study_sessions.count }} total</span>
+    </div>
+    {% if study_sessions %}
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Chapter</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in study_sessions %}
+                <tr>
+                    <td>
+                        <strong>{{ session.start_time|time:"g:i A" }}</strong>
+                        <span class="muted">– {{ session.end_time|time:"g:i A" }}</span>
+                    </td>
+                    <td>
+                        <span class="chip">
+                            <span class="swatch" style="background: {{ session.subject.color }};"></span>
+                            {{ session.subject.code }}
+                        </span>
+                    </td>
+                    <td>{{ session.chapter.title }}</td>
+                    <td>
+                        <span class="badge {% if session.priority == 'high' %}badge-red{% elif session.priority == 'medium' %}badge-amber{% else %}badge-blue{% endif %}">
+                            {{ session.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if session.status == 'completed' %}badge-green{% elif session.status == 'in_progress' %}badge-indigo{% elif session.status == 'skipped' %}badge-gray{% else %}badge-amber{% endif %}">
+                            <span class="badge-dot"></span>{{ session.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn-secondary btn-sm" href="{% url 'planner:study_session_edit' pk=session.pk %}">Edit</a>
+                            <a class="btn btn-ghost btn-sm" href="{% url 'planner:study_session_delete' pk=session.pk %}">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No sessions scheduled</h3>
+        <p>Add a study session for this day.</p>
+        <a class="btn btn-primary" href="{% url 'planner:study_session_create' plan_pk=daily_plan.pk %}">Add Session</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · StudySync{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">
+            For <a href="{% url 'subjects:subject_detail' pk=subject.pk %}">{{ subject.name }}</a>
+        </p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% include "partials/form_field.html" with field=form.title %}
+            {% include "partials/form_field.html" with field=form.chapter_number %}
+            {% include "partials/form_field.html" with field=form.estimated_hours %}
+            {% include "partials/form_field.html" with field=form.is_completed %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if chapter %}Save Changes{% else %}Add Chapter{% endif %}
+                </button>
+                <a class="btn btn-secondary" href="{% url 'subjects:subject_detail' pk=subject.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

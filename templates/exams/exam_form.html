@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · StudySync{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">Keep track of important exam dates.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% include "partials/form_field.html" with field=form.subject %}
+            {% include "partials/form_field.html" with field=form.title %}
+            {% include "partials/form_field.html" with field=form.exam_date %}
+            {% include "partials/form_field.html" with field=form.exam_time %}
+            {% include "partials/form_field.html" with field=form.duration %}
+            {% include "partials/form_field.html" with field=form.location %}
+            {% include "partials/form_field.html" with field=form.importance %}
+            {% include "partials/form_field.html" with field=form.status %}
+            {% include "partials/form_field.html" with field=form.notes %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if exam %}Save Changes{% else %}Schedule Exam{% endif %}
+                </button>
+                <a class="btn btn-secondary" href="{% url 'exams:exam_list' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · StudySync{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">Capture your thoughts while they're fresh.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px;">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% include "partials/form_field.html" with field=form.title %}
+            {% include "partials/form_field.html" with field=form.subject %}
+            {% include "partials/form_field.html" with field=form.tags %}
+            {% include "partials/form_field.html" with field=form.content %}
+            {% include "partials/form_field.html" with field=form.attachment %}
+            {% include "partials/form_field.html" with field=form.is_favorite %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if note %}Save Changes{% else %}Create Note{% endif %}
+                </button>
+                <a class="btn btn-secondary" href="{% if note %}{% url 'notes:note_detail' pk=note.pk %}{% else %}{% url 'notes:note_list' %}{% endif %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

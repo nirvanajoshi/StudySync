@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% load studysync_extras %}
+
+{% block title %}{{ subject.name }} · Progress · StudySync{% endblock %}
+{% block page_title %}{{ subject.code }} · {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ subject.name }}</h1>
+        <p class="subtitle">Chapter-by-chapter progress.</p>
+    </div>
+    <a class="btn btn-secondary" href="{% url 'subjects:subject_detail' pk=subject.pk %}">Open Subject</a>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="stat-icon sky">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+        </span>
+        <div>
+            <div class="stat-value">{{ completed_chapters }}<span class="muted" style="font-size: 15px;">/{{ total_chapters }}</span></div>
+            <div class="stat-label">Chapters Completed</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-icon green">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </span>
+        <div>
+            <div class="stat-value">{{ completion_rate }}%</div>
+            <div class="stat-label">Completion Rate</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-icon amber">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </span>
+        <div>
+            <div class="stat-value">{{ subject_study_time|fmt_hours }}</div>
+            <div class="stat-label">Total Study Time</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h2>Chapters</h2></div>
+    {% if chapters %}
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Est. Hours</th>
+                    <th style="width: 220px;">Progress</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chapter in chapters %}
+                <tr>
+                    <td><strong>{{ chapter.chapter_number }}</strong></td>
+                    <td>
+                        <a class="item-title" href="{% url 'subjects:chapter_detail' pk=chapter.pk %}">{{ chapter.title }}</a>
+                    </td>
+                    <td>{{ chapter.estimated_hours }}h</td>
+                    <td>
+                        {% if total_chapters %}
+                        <div class="progress">
+                            <div class="progress-bar {% if chapter.is_completed %}green{% endif %}"
+                                 style="width: {% widthratio 1 total_chapters 100 %}%;"></div>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if chapter.is_completed %}
+                        <span class="badge badge-green"><span class="badge-dot"></span>Completed</span>
+                        {% else %}
+                        <span class="badge badge-gray"><span class="badge-dot"></span>Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No chapters yet</h3>
+        <p>Add chapters to this subject to start tracking progress.</p>
+        <a class="btn btn-primary" href="{% url 'subjects:chapter_create' subject_pk=subject.pk %}">Add Chapter</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

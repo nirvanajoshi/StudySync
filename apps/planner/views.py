@@ -224,6 +224,7 @@ def study_session_edit(request, pk):
         "planner/study_session_form.html",
         {
             "form": form,
+            "daily_plan": session.daily_plan,
             "session": session,
             "title": "Edit Study Session",
         }

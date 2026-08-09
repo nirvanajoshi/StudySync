@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign In · StudySync{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-brand">
+        <span class="brand-logo">S</span>
+        <span class="brand-name">Study<span>Sync</span></span>
+    </div>
+
+    <h1>Welcome back 👋</h1>
+    <p class="auth-sub">Sign in to keep your study plan on track.</p>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-error">
+        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% include "partials/form_field.html" with field=form.username %}
+        {% include "partials/form_field.html" with field=form.password %}
+
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+
+    <p class="auth-footer">
+        New to StudySync? <a href="{% url 'accounts:register' %}">Create an account</a>
+    </p>
+</div>
+{% endblock %}

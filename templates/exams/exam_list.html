@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+{% load studysync_extras %}
+
+{% block title %}Exams · StudySync{% endblock %}
+{% block page_title %}Exams{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>My Exams</h1>
+        <p class="subtitle">Never miss an exam again.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'exams:exam_create' %}">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Schedule Exam
+    </a>
+</div>
+
+{% if exams %}
+<div class="exam-list">
+    {% for exam in exams %}
+    <a class="exam-row" href="{% url 'exams:exam_detail' pk=exam.pk %}">
+        <span class="exam-date {% if exam.status == 'completed' %}done{% elif exam.status == 'missed' or exam.status == 'cancelled' %}muted{% endif %}" style="min-width: 64px; padding: 10px;">
+            <span class="d" style="font-size: 20px; font-weight: 800; line-height: 1;">{{ exam.exam_date|date:"j" }}</span>
+            <span class="m" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">{{ exam.exam_date|date:"M" }}</span>
+        </span>
+        <div class="grow" style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <strong style="font-size: 15px;">{{ exam.title }}</strong>
+                <span class="chip">
+                    <span class="swatch" style="background: {{ exam.subject.color }};"></span>
+                    {{ exam.subject.code }}
+                </span>
+            </div>
+            <div class="muted small mt-8">
+                {{ exam.exam_time|time:"g:i A" }} · {{ exam.duration|fmt_duration }}
+                {% if exam.location %} · {{ exam.location }}{% endif %}
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <span class="badge {% if exam.importance == 'high' %}badge-red{% elif exam.importance == 'medium' %}badge-amber{% else %}badge-blue{% endif %}">
+                {{ exam.get_importance_display }}
+            </span>
+            <span class="badge {% if exam.status == 'upcoming' %}badge-indigo{% elif exam.status == 'completed' %}badge-green{% elif exam.status == 'missed' %}badge-red{% else %}badge-gray{% endif %}">
+                <span class="badge-dot"></span>{{ exam.get_status_display }}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <span class="empty-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </span>
+        <h3>No exams scheduled</h3>
+        <p>Add your upcoming exams to plan your revision around them.</p>
+        <a class="btn btn-primary" href="{% url 'exams:exam_create' %}">Schedule an Exam</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

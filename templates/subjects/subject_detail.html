@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ subject.name }} · StudySync{% endblock %}
+{% block page_title %}{{ subject.code }} · {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ subject.name }}</h1>
+        <p class="subtitle">
+            <span class="chip">
+                <span class="swatch" style="background: {{ subject.color }};"></span>
+                {{ subject.code }}
+            </span>
+            <span class="badge {% if subject.difficulty == 'hard' %}badge-red{% elif subject.difficulty == 'medium' %}badge-amber{% else %}badge-green{% endif %}" style="margin-left: 8px;">
+                {{ subject.get_difficulty_display }}
+            </span>
+            <span class="badge badge-indigo" style="margin-left: 4px;">Target: {{ subject.target_grade }}</span>
+        </p>
+    </div>
+    <div class="flex">
+        <a class="btn btn-secondary" href="{% url 'subjects:chapter_create' subject_pk=subject.pk %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Chapter
+        </a>
+        <a class="btn btn-primary" href="{% url 'subjects:subject_edit' pk=subject.pk %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+        </a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div class="card">
+        <div class="card-header"><h2>Details</h2></div>
+        <div class="card-body">
+            <div class="detail-list">
+                <div class="detail-item">
+                    <div class="k">Code</div>
+                    <div class="v">{{ subject.code }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="k">Difficulty</div>
+                    <div class="v">{{ subject.get_difficulty_display }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="k">Target Grade</div>
+                    <div class="v">{{ subject.target_grade }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="k">Chapters</div>
+                    <div class="v">{{ chapters.count }}</div>
+                </div>
+            </div>
+            {% if subject.description %}
+            <div class="divider"></div>
+            <p class="prose">{{ subject.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card mt-24">
+    <div class="card-header">
+        <h2>Chapters</h2>
+        <span class="badge badge-indigo">{{ chapters.count }} total</span>
+    </div>
+    {% if chapters %}
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Est. Hours</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chapter in chapters %}
+                <tr>
+                    <td><strong>{{ chapter.chapter_number }}</strong></td>
+                    <td>
+                        <a class="item-title" href="{% url 'subjects:chapter_detail' pk=chapter.pk %}">{{ chapter.title }}</a>
+                    </td>
+                    <td>{{ chapter.estimated_hours }}h</td>
+                    <td>
+                        {% if chapter.is_completed %}
+                        <span class="badge badge-green"><span class="badge-dot"></span>Completed</span>
+                        {% else %}
+                        <span class="badge badge-gray"><span class="badge-dot"></span>Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn-secondary btn-sm" href="{% url 'subjects:chapter_edit' pk=chapter.pk %}">Edit</a>
+                            <a class="btn btn-ghost btn-sm" href="{% url 'subjects:chapter_delete' pk=chapter.pk %}">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No chapters yet</h3>
+        <p>Break this subject down into chapters to track your progress.</p>
+        <a class="btn btn-primary" href="{% url 'subjects:chapter_create' subject_pk=subject.pk %}">Add Chapter</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

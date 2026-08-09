@@ -232,6 +232,7 @@ def chapter_edit(request, pk):
         "subjects/chapter_form.html",
         {
             "form": form,
+            "subject": chapter.subject,
             "chapter": chapter,
             "title": "Edit Chapter",
         }

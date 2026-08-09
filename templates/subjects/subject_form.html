@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · StudySync{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">Define the subject and how you'll tackle it.</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 640px;">
+    <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% include "partials/form_field.html" with field=form.name %}
+            {% include "partials/form_field.html" with field=form.code %}
+            {% include "partials/form_field.html" with field=form.description %}
+            {% include "partials/form_field.html" with field=form.difficulty %}
+            {% include "partials/form_field.html" with field=form.color %}
+            {% include "partials/form_field.html" with field=form.target_grade %}
+            {% include "partials/form_field.html" with field=form.is_active %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if subject %}Save Changes{% else %}Create Subject{% endif %}
+                </button>
+                <a class="btn btn-secondary" href="{% url 'subjects:subject_list' %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

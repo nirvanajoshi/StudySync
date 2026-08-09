@@ -3,6 +3,13 @@ from .models import Subject, Chapter
 
 
 class SubjectForm(forms.ModelForm):
+    color = forms.CharField(
+        widget=forms.TextInput(attrs={
+            "type": "color",
+            "class": "color-input",
+        }),
+    )
+
     class Meta:
         model = Subject
         fields = [

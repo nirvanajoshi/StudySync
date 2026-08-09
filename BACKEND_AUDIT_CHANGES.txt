@@ -150,3 +150,67 @@ Run these from the project root (C:\Users\damod\projects\StudySync):
   python manage.py test
 
 =====================================================================
+FOLLOW-UP WORK COMPLETED - 2026-08-09 (FRONTEND + ROUTING WRAP-UP)
+=====================================================================
+
+All deferred items from the audit are now done:
+
+1. config/settings.py - Auth URL names now namespaced:
+   - LOGIN_URL            = 'accounts:login'
+   - LOGIN_REDIRECT_URL   = 'dashboard:dashboard'
+   - LOGOUT_REDIRECT_URL  = 'accounts:login'
+
+2. apps/dashboard/views.py - Dashboard now wired with real per-user
+   metrics: active subject count, note count, upcoming exams, today's
+   daily plans, today's completed study time, recent notes.
+
+3. apps/dashboard/templatetags/studysync_extras.py (NEW) - Shared
+   filters: fmt_duration (timedelta -> "2h 05m"), fmt_hours (decimal
+   hours -> "3.5 hrs"), profile_picture_url (safe for users without
+   a Profile row).
+
+4. apps/subjects/views.py - chapter_edit now passes subject to the
+   template (fixes NoReverseMatch on the edit page).
+
+5. apps/planner/views.py - study_session_edit now passes daily_plan
+   to the template (fixes NoReverseMatch on the edit page).
+
+6. apps/subjects/forms.py + apps/notes/forms.py - color fields now
+   render as native <input type="color"> pickers.
+
+7. apps/exams/forms.py - duration field now has help text + placeholder
+   (format hint: HH:MM:SS).
+
+8. templates/ (NEW - 33 files) - Complete UI:
+   - base.html: sidebar nav (Dashboard/Subjects/Planner/Exams/Progress/
+     Notes/Tags), topbar with user menu, toast messages, mobile layout
+   - partials/: form_field.html (labels/errors/help), toasts.html
+   - accounts: login, register, logout_confirm, profile, profile_edit
+   - dashboard: dashboard
+   - subjects: list, detail, form, delete, chapter form/detail/delete
+   - planner: planner, plan form/detail/delete, session form/delete
+   - exams: list, detail, form, delete
+   - progress: dashboard, subject_progress
+   - notes: note list/detail/form/delete, tag list/form/delete
+
+9. static/css/style.css (NEW) - Full design system: dark sidebar,
+   stat cards, badges, progress bars, tables, forms, toasts,
+   responsive breakpoint at 900px, reduced-motion support.
+
+10. static/js/script.js (NEW) - Mobile sidebar toggle, dropdown menu,
+    auto-dismissing toasts, data-confirm/data-autosubmit guards.
+
+VERIFICATION (all green):
+  - python manage.py check                          -> 0 issues
+  - python manage.py makemigrations --check         -> no changes
+  - Full URL smoke test (43 URLs, incl. cross-user
+    404 checks and logged-in detail pages)          -> ALL PASSED
+  - Rendered-content checks for the demo account    -> ALL PASSED
+
+NOTE: A demo account exists in the local dev DB:
+  username: demo   password: demo12345
+Delete it anytime with:
+  python manage.py shell -c "from django.contrib.auth.models
+  import User; User.objects.filter(username='demo').delete()"
+
+=====================================================================
